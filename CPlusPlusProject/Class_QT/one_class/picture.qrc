@@ -1,7 +1,0 @@
-<RCC>
-    <qresource>
-        <file>../../images/resource/background.png</file>
-        <file>../../images/resource/DOS.jpg</file>
-        <file>../../images/resource/write.jpg</file>
-    </qresource>
-</RCC>
