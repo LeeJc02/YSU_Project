@@ -7,20 +7,20 @@
 # 目录
 
 - 大一上：
-    - C Language (5.5学分)
+    1. C Language (5.5学分)
 
       - 三级项目: 手机销售信息管理系统
       - 实验
 
 - 大一下：
-    - C Plus Plus (3 + 1学分)
+    1. C Plus Plus (3 + 1学分)
 
       - 三级项目: ATM系统 (QT可视化版)
       - 实验
       - 课设: [虚拟电视机 (基于QT的视频播放器)](https://github.com/LeeJc02/Qt_Player)
 
 - 大二上: 
-    - Introduction to AI (2学分)
+    1. Introduction to AI (2学分)
 
       - 三级项目: (注: 因部分数据集文件过大无法上传, 请联系老师获取数据集)
 
@@ -30,6 +30,6 @@
 
       - 实验 
   
-    - Data Structure (4.5学分)
+    2. Data Structure (4.5学分)
       - 实验
  
