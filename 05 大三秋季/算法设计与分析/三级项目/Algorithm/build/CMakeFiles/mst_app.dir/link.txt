@@ -1,1 +1,0 @@
-/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/mst_app.dir/src/main.cpp.o CMakeFiles/mst_app.dir/src/prim_algo.cpp.o CMakeFiles/mst_app.dir/src/kruskal_algo.cpp.o -o mst_app

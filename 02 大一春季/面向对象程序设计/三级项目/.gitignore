@@ -1,0 +1,17 @@
+# macOS 系统文件
+.DS_Store
+
+build/
+build-*/
+cmake-build-*/
+out/
+bin/
+lib/
+
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+Makefile
+compile_commands.json
