@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <img src="/img/ysu.png" alt="ATM图片" class="atm-image">
+    <h1 class="atm-title">YSU银行模拟ATM</h1>
+  </div>
+  <h2>注册</h2>
+  <form @submit.prevent="registerUser">
+    <!-- 用户名输入框 -->
+    <div class="input-container">
+      <label for="username">用户名：</label>
+      <input
+              id="username"
+              v-model="register.username"
+              type="text"
+              placeholder="请输入用户名"
+              required
+      />
+    </div>
+
+    <!-- 卡号输入框 -->
+    <div class="input-container">
+      <label for="cardNumber">卡号：</label>
+      <input
+              id="cardNumber"
+              v-model="register.cardNumber"
+              type="text"
+              placeholder="请输入卡号"
+              @blur="checkCardNumber"
+              :class="{'input-error': cardError}"
+              required
+      />
+      <span v-if="cardError" class="error-message">{{ cardErrorMessage }}</span>
+    </div>
+
+    <!-- 密码输入框 -->
+    <div class="input-container">
+      <label for="password">密码：</label>
+      <input
+              id="password"
+              v-model="register.password"
+              type="password"
+              placeholder="请输入密码"
+              @blur="checkPassword"
+              :class="{'input-error': passwordError}"
+              required
+      />
+      <span v-if="passwordError" class="error-message">{{ passwordErrorMessage }}</span>
+    </div>
+
+    <!-- 重复密码输入框 -->
+    <div class="input-container">
+      <label for="confirmPassword">确认密码：</label>
+      <input
+              id="confirmPassword"
+              v-model="register.confirmPassword"
+              type="password"
+              placeholder="请再次输入密码"
+              @blur="checkConfirmPassword"
+              :class="{'input-error': confirmPasswordError}"
+              required
+      />
+      <span v-if="confirmPasswordError" class="error-message">{{ confirmPasswordErrorMessage }}</span>
+    </div>
+
+    <!-- 初始存款金额输入框 -->
+    <div class="input-container">
+      <label for="initialDeposit">初始金额：</label>
+      <input
+              id="initialDeposit"
+              v-model="register.initialDeposit"
+              type="number"
+              placeholder="请输入初始金额 (默认为0)"
+              @blur="checkDeposit"
+              :class="{'input-error': depositError}"
+              required
+      />
+      <span v-if="depositError" class="error-message">{{ depositErrorMessage }}</span>
+    </div>
+
+    <!-- 提交按钮 -->
+    <button type="submit" :disabled="cardError || passwordError || confirmPasswordError || depositError">注册</button>
+    <button @click="goBack">返回</button>
+  </form>
+
+  <p>
+    已经有账户？<a href="/login">去登录</a>
+  </p>
+</div>
+<footer class="footer">
+  <p>作者：23计算机科学与技术5班 李济岑 &copy; 2025 YSU银行ATM模拟系统</p>
+</footer>
+<script src="/js/register.js">
+
+</script>
+</body>
+</html>

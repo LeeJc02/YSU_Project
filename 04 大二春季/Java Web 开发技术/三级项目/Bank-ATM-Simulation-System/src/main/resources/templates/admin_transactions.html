@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员查询交易流水</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app">
+<!--    <div class="header">-->
+<!--        <img src="/img/ysu.png" alt="ATM图片" class="atm-image">-->
+<!--        <h1 class="atm-title">YSU银行模拟ATM</h1>-->
+<!--    </div>-->
+    <h2>管理员查询交易流水</h2>
+
+
+    <div class="search-container">
+        <input v-model="searchCardNumber" type="text" placeholder="请输入用户卡号" />
+        <button @click="getTransactionsByCardNumber">确认</button>
+        <button @click="goBack">返回</button>
+    </div>
+
+<!--    <div class="transaction-list">-->
+    <div>
+        <div v-if="transactions.length > 0">
+            <h3>交易历史:</h3>
+            <!-- 使用表格展示交易记录 -->
+            <table>
+                <thead>
+                <tr>
+                    <th>交易 ID</th>
+                    <th>发起用户</th>
+                    <th>发起用户卡号</th>
+                    <th>交易类型</th>
+                    <th>金额</th>
+                    <th>目标用户</th>
+                    <th>目标用户卡号</th>
+                    <th>交易时间</th>
+                    <th>交易状态</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="transaction in transactions" :key="transaction.transactionId">
+                    <td>{{ transaction.transactionId }}</td>
+                    <td>{{ transaction.userName }}</td>
+                    <td>{{ transaction.userCardNumber }}</td>
+                    <td>{{ getTransactionType(transaction.type) }}</td> <!-- 显示中文交易类型 -->
+                    <td>{{ transaction.amount }}</td>
+                    <td>{{ transaction.targetUserName }}</td>
+                    <td>{{ transaction.targetUserCardNumber }}</td>
+                    <td>{{ transaction.timestamp }}</td>
+                    <td>
+                        <span v-if="transaction.transactionStatus">成功</span>
+                        <span v-else>失败</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- 分页按钮 -->
+            <div class="pagination">
+                <button @click="previousPage" :disabled="currentPage === 1">上一页</button>
+                <span>第 {{ currentPage }} 页</span>
+                <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
+            </div>
+        </div>
+        <div v-else>
+            <p>没有找到相关交易记录。</p>
+        </div>
+    </div>
+</div>
+<footer class="footer">
+    <p>作者：23计算机科学与技术5班 李济岑 &copy; 2025 YSU银行ATM模拟系统</p>
+</footer>
+<script src="/js/admin_transactions.js">
+
+</script>
+</body>
+</html>

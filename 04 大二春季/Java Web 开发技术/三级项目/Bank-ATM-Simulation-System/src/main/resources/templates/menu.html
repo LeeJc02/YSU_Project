@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>银行 ATM 机模拟 - 菜单</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app">
+    <div class="header">
+        <img src="/img/ysu.png" alt="ATM图片" class="atm-image">
+        <h1 class="atm-title">YSU银行模拟ATM</h1>
+    </div>
+    <h2 >尊敬的{{ userName }}，你好</h2>
+    <p v-if="balance !== null">当前余额：{{ balance }}</p>
+    <p v-else>加载中...</p>
+
+    <div class="menuform-container">
+
+        <button @click="goToDeposit">存款</button>
+        <button @click="goToWithdraw">取款</button>
+        <button @click="goToTransfer">转账</button>
+        <button @click="goToChange">修改</button>
+        <button @click="goToTransaction">流水</button>
+        <button @click="goToCancel">注销</button>
+        <button @click="goToLogout">退出</button>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>作者：23计算机科学与技术5班 李济岑 &copy; 2025 YSU银行ATM模拟系统</p>
+</footer>
+<script src="/js/menu.js"></script>
+</body>
+</html>

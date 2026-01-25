@@ -1,0 +1,297 @@
+/* 通用样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* 页面基本样式 */
+body {
+    background-image: url('../img/background.png');
+    background-size: cover; /* 图片按比例缩放 */
+    background-position: center center; /* 背景图片居中显示 */
+    background-attachment: fixed; /* 背景固定，滚动页面时背景不动 */
+    background-color: #f9f9f9;
+    color: #333;
+    font-size: 16px;
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+    margin-top: 20px;
+}
+
+/* 表单容器样式 */
+.form-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;  /* 允许换行 */
+    gap: 60px; /* 按钮间距 */
+    /*display: flex; !* 使用弹性布局 *!*/
+    /*flex-direction: column; !* 垂直排列按钮 *!*/
+    /*justify-content: center; !* 垂直居中 *!*/
+    /*align-items: center; !* 水平居中 *!*/
+    text-align: left;
+    width: 600px;
+    height: 400px;
+    margin: auto;
+}
+
+.menuform-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;  /* 使用弹性布局 */
+    flex-wrap: wrap;  /* 允许换行 */
+    gap: 20px;  /* 设置按钮间的间距 */
+    justify-content: center;  /* 水平居中 */
+    align-items: center;  /* 垂直居中 */
+    text-align: left;
+    width: 600px;
+    height: 400px;
+    margin: auto;
+}
+
+.menuform-container button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+}
+
+.menuform-container button:hover {
+    background-color: #0056b3;
+}
+
+.adminform-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;  /* 使容器成为flex容器 */
+    flex-direction: column;  /* 垂直排列按钮 */
+    flex-wrap: wrap;  /* 允许换行 */
+    gap: 20px; /* 按钮间距 */
+    text-align: left;
+    width: 600px;
+    height: 400px;
+    margin: auto;
+    justify-content: center;  /* 垂直方向居中 */
+    align-items: center;  /* 水平方向居中 */
+}
+
+
+.welcome-container {
+    text-align: center;
+}
+
+/* 输入框和标签样式 */
+.input-container {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+input {
+    padding: 8px;
+    width: 100%;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+input:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+.input-error {
+    border-color: red;
+}
+
+/* 错误消息 */
+.error-message, .message {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+    text-align: center;
+}
+
+/* 成功或失败消息 */
+.message {
+    color: green;
+    font-weight: bold;
+}
+
+/* 按钮样式 */
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* 特定按钮颜色 */
+button:first-child {
+    background-color: #ff4444;
+}
+
+button:first-child:hover {
+    background-color: #e54343;
+}
+
+button:nth-child(2) {
+    background-color: #4CAF50;
+}
+
+button:nth-child(2):hover {
+    background-color: #45a049;
+}
+
+button:nth-child(3) {
+    background-color: #2196F3;
+}
+
+button:nth-child(3):hover {
+    background-color: #1e88e5;
+}
+
+/* 按钮容器样式 */
+.button-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.button-container button {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+/* 表格样式 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 10px 15px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+td {
+    font-size: 14px;
+}
+
+/* 提示消息 */
+p {
+    margin-top: 20px;
+    text-align: center;
+}
+
+a {
+    color: #4CAF50;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Welcome 页面专用样式 */
+.welcome-container h1 {
+    color: #4CAF50;
+}
+
+.welcome-container .btn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.welcome-container .btn:hover {
+    background-color: #45a049;
+}
+
+/* 图片和大字标题样式 */
+.header {
+    text-align: center;
+    margin-bottom: 30px; /* 为下方表单容器留出空间 */
+}
+
+.atm-image {
+    width: 150px;  /* 调整图片大小 */
+    height: auto;
+    margin-bottom: 20px; /* 图片和标题之间的距离 */
+}
+
+.atm-title {
+    font-size: 32px;  /* 标题的大小 */
+    color: #333;
+    font-weight: bold;
+    margin-top: 10px; /* 标题和图片之间的间距 */
+}
+
+.footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    color: #666;
+    background-color: transparent;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修改信息</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app">
+    <div class="header">
+        <img src="/img/ysu.png" alt="ATM图片" class="atm-image">
+        <h1 class="atm-title">YSU银行模拟ATM</h1>
+    </div>
+    <h2>修改信息</h2>
+    <form @submit.prevent="updateUser">
+        <!-- 新用户名输入框 -->
+        <div class="input-container">
+            <label for="newUsername">新用户名：</label>
+            <input
+                    id="newUsername"
+                    v-model="update.username"
+                    type="text"
+                    placeholder="请输入新用户名"
+            />
+        </div>
+
+        <!-- 新卡号输入框 -->
+        <div class="input-container">
+            <label for="newCardNumber">新卡号：</label>
+            <input
+                    id="newCardNumber"
+                    v-model="update.cardNumber"
+                    type="text"
+                    placeholder="请输入新卡号（可不输入，默认为当前卡号）"
+                    @blur="checkCardNumber"
+                    :class="{'input-error': cardError}"
+            />
+            <span v-if="cardError" class="error-message">{{ cardErrorMessage }}</span>
+        </div>
+
+        <!-- 新密码输入框 -->
+        <div class="input-container">
+            <label for="newPassword">新密码：</label>
+            <input
+                    id="newPassword"
+                    v-model="update.password"
+                    type="password"
+                    placeholder="请输入新密码"
+                    @blur="checkPassword"
+                    :class="{'input-error': passwordError}"
+            />
+            <span v-if="passwordError" class="error-message">{{ passwordErrorMessage }}</span>
+        </div>
+
+        <!-- 确认新密码输入框 -->
+        <div class="input-container">
+            <label for="confirmNewPassword">确认密码：</label>
+            <input
+                    id="confirmNewPassword"
+                    v-model="update.confirmPassword"
+                    type="password"
+                    placeholder="请再次输入新密码"
+                    @blur="checkConfirmPassword"
+                    :class="{'input-error': confirmPasswordError}"
+            />
+            <span v-if="confirmPasswordError" class="error-message">{{ confirmPasswordErrorMessage }}</span>
+        </div>
+
+        <!-- 提交按钮 -->
+        <button type="submit" :disabled="cardError || passwordError || confirmPasswordError">提交修改</button>
+        <button @click="goBack">返回</button>
+    </form>
+</div>
+<footer class="footer">
+    <p>作者：23计算机科学与技术5班 李济岑 &copy; 2025 YSU银行ATM模拟系统</p>
+</footer>
+<script src="/js/change.js">
+
+</script>
+</body>
+</html>

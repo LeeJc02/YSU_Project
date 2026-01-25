@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>银行 ATM 机模拟 - 登录</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <img src="/img/ysu.png" alt="ATM图片" class="atm-image">
+    <h1 class="atm-title">YSU银行模拟ATM</h1>
+  </div>
+
+  <div class="form-container">
+    <h2>欢迎登录</h2>
+
+    <form @submit.prevent="loginUser">
+      <div class="input-container">
+        <label for="cardNumber">银行卡号：</label>
+        <input
+                id="cardNumber"
+                v-model.trim="login.cardNumber"
+                type="text"
+                placeholder="请输入您的银行卡号"
+                required
+        >
+      </div>
+
+      <div class="input-container">
+        <label for="password">登录密码：</label>
+        <input
+                id="password"
+                v-model.trim="login.password"
+                type="password"
+                placeholder="请输入6位数字密码"
+                required
+        >
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">登录</button>
+        <button @click="goBack" class="btn btn-secondary">返回上级</button>
+      </div>
+    </form>
+
+    <p class="auth-link">
+      尚未注册账户？
+      <a href="/register">立即开户</a>
+    </p>
+  </div>
+</div>
+<footer class="footer">
+  <p>作者：23计算机科学与技术5班 李济岑 &copy; 2025 YSU银行ATM模拟系统</p>
+</footer>
+<script src="/js/login.js"></script>
+</body>
+</html>

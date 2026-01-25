@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员查询用户信息</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app">
+    <h2>管理员查询用户信息</h2>
+
+
+
+    <!-- 用户卡号输入框和确认按钮 -->
+    <div class="search-container">
+        <input v-model="searchCardNumber" type="text" placeholder="请输入用户卡号" />
+        <button @click="getUserByCardNumber">确认</button>
+        <button @click="goBack">返回</button>
+    </div>
+
+    <div class="user-list">
+        <div v-if="users.length > 0">
+            <h3>用户信息:</h3>
+            <!-- 使用表格展示用户信息 -->
+            <table>
+                <thead>
+                <tr>
+                    <th>用户ID</th>
+                    <th>用户名</th>
+                    <th>卡号</th>
+                    <th>余额</th>
+                    <th>创建时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="user in users" :key="user.userId">
+                    <td>{{ user.userId }}</td>
+                    <td>{{ user.userName }}</td>
+                    <td>{{ user.cardNumber }}</td>
+                    <td>{{ user.balance }}</td>
+                    <td>{{ user.createdAt }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div v-else>
+            <p>没有找到相关用户。</p>
+        </div>
+    </div>
+</div>
+<footer class="footer">
+    <p>作者：23计算机科学与技术5班 李济岑 &copy; 2025 YSU银行ATM模拟系统</p>
+</footer>
+<script src="/js/admin_users.js"></script>
+</body>
+</html>
