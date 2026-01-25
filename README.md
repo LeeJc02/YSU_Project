@@ -77,5 +77,6 @@
 - 差不多行啦差不多行啦，世界都是草台班子
 
 **注**：使用本仓库内容前请先阅读有关[学术诚信](https://integrity.mit.edu)相关内容，严禁直接抄袭，违者后果概不负责
+
 **注**：对本仓库的贡献补充，请严格遵守 `fork - clone - code review - commit - push - pr`
 
