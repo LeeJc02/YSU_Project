@@ -1,6 +1,5 @@
 # YSU Projects of CS
 
----
 燕山大学计算机科学与技术专业课程项目
 [燕山大学软件工程专业课程项目](https://github.com/rurumuri/ysuse-2022)
 
