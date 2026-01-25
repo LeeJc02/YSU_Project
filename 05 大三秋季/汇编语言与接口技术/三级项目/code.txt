@@ -1,0 +1,707 @@
+;================ 版本v 4.2 ===================
+
+;=============== I/O 地址定义 ==================
+TIMER0      EQU     0600H       ; IOY0  C0 -> OUT0
+TIMER1      EQU     0602H       ; IOY0  C1 -> MIR6(OUT1)
+TIMER2      EQU     0604H
+TIMERM      EQU     0606H       ; IOY0  Control
+
+P8255A      EQU     0640H       ; IOY1  PA -> K0-K7 输入
+P8255B      EQU     0642H       ;       PB -> 数码管 A-Dp 输出(段码)
+P8255C      EQU     0644H       ;       PC -> LED L0-L7 
+P8255M      EQU     0646H
+
+TIME_INIT   EQU     10000       ; 10秒窗口（1ms）
+MS_INIT     EQU     1000        ; 1秒计数（1ms）
+
+;=================== 数据段 ====================
+DATA        SEGMENT
+STATUS      DB      00H         ; 00空闲/复位 01允许抢答 11已锁定 10超时
+STA         DB      01H
+
+TIME        DW      TIME_INIT
+MS_CNT      DW      MS_INIT
+SEC_DIG     DB      9
+
+WINNER      DB      0FFH        
+SCORE_REQ   DB      0
+BEEP_REQ    DB      0
+MENU_REQ    DB      0
+
+SCORES      DB      9 DUP(0)
+
+; ----数码管段码表----
+DIGTAB      DB      3FH,06H,5BH,4FH,66H,6DH,7DH,07H,7FH,6FH
+;             0    1    2    3    4    5    6    7    8    9
+
+; ----音效频率表----
+FREQ_LIST1  DW      523,578,659,-1,0
+FREQ_LIST2  DW      578,659,698,-1,0
+FREQ_LIST3  DW      659,698,784,-1,0
+FREQ_LIST4  DW      698,784,880,-1,0
+FREQ_LIST5  DW      784,880,988,-1,0
+FREQ_LIST6  DW      880,988,1046,-1,0
+FREQ_LIST7  DW      988,1046,1175,-1,0
+FREQ_LIST8  DW      1046,1175,1318,-1,0
+
+; ----用表选频率表指针----
+FREQ_PTRS   DW      OFFSET FREQ_LIST1, OFFSET FREQ_LIST2, OFFSET FREQ_LIST3, OFFSET FREQ_LIST4
+            DW      OFFSET FREQ_LIST5, OFFSET FREQ_LIST6, OFFSET FREQ_LIST7, OFFSET FREQ_LIST8
+
+TIME_LIST   DB      3,3,5,1,50
+
+;================== 文本 ==================
+INFO1       DB      0DH,0AH,'WELCOME',0DH,0AH
+            DB      '1 SHOW ALL SCORE',0DH,0AH
+            DB      '2 AGAIN$'
+INFO2       DB      0DH,0AH,'PLEASE INPUT SCORE (0-9): $'
+INFO3       DB      0DH,0AH,'PLEASE INPUT YOUR OPTION: $'
+ERROR       DB      0DH,0AH,'WRONG PLEASE INPUT AGAIN$'
+CLRMSG      DB      0DH,0AH,'SCORES CLEARED!$'
+RETMSG      DB      0DH,0AH,'PRESS 0 THEN ENTER TO EXIT$'
+ENTERMSG    DB      0DH,0AH,'PRESS ENTER TO RETURN$'
+
+INBUF       DB      2,0,2 DUP(0)
+WAITBUF     DB      1,0,1 DUP(0)
+DATA        ENDS
+
+;================= 堆栈段 =================
+SSTACK      SEGMENT PARA STACK 'STACK'
+            DW      64 DUP(?)
+SSTACK      ENDS
+
+;================= 代码段 ==================
+CODE        SEGMENT
+            ASSUME  CS:CODE, DS:DATA, SS:SSTACK
+
+;===========================================
+; 写PC口, 保持 X3 选通
+;===========================================
+PC_FORCE_X3_ON PROC NEAR
+            PUSH    DX
+            AND     AL,0FEH            ; 强制PC0 = 0
+            MOV     DX,P8255C
+            OUT     DX,AL
+            POP     DX
+            RET
+PC_FORCE_X3_ON ENDP
+
+;============================================
+; 数码管显示：AL=0..9 -> PB 段码
+;============================================
+SHOW_DIG    PROC NEAR
+            PUSH    BX
+            PUSH    DX
+            XOR     BX,BX
+            MOV     BL,AL
+            MOV     AL,DIGTAB[BX]
+            MOV     DX,P8255B
+            OUT     DX,AL
+            POP     DX
+            POP     BX
+            RET
+SHOW_DIG    ENDP
+
+WAIT_ENTER  PROC NEAR
+            PUSH    AX
+            PUSH    DX
+            MOV     BYTE PTR WAITBUF+1,0
+            LEA     DX,WAITBUF
+            MOV     AH,0AH
+            INT     21H
+            POP     DX
+            POP     AX
+            RET
+WAIT_ENTER  ENDP
+
+;=============================================
+; 抢答扫描, 中断中调用
+;=============================================
+SWITCH_SCAN PROC NEAR
+            PUSH    AX
+            PUSH    BX
+            PUSH    DX
+
+            CMP     STATUS,01H
+            JNZ     SS_EXIT
+
+            MOV     DX,P8255A
+            IN      AL,DX
+            CMP     AL,0
+            JZ      SS_EXIT
+
+            MOV     BL,0
+SS_L:
+            TEST    AL,01H
+            JNZ     GOT
+            SHR     AL,1
+            INC     BL
+            CMP     BL,8
+            JB      SS_L
+            JMP     SS_EXIT
+
+GOT:
+            MOV     WINNER,BL
+            MOV     STATUS,11H
+            MOV     SCORE_REQ,1
+            MOV     BEEP_REQ,1
+
+            ; 显示抢答号：1..8
+            MOV     AL,BL
+            INC     AL
+            CALL    SHOW_DIG
+
+SS_EXIT:
+            POP     DX
+            POP     BX
+            POP     AX
+            RET
+SWITCH_SCAN ENDP
+
+;========================================
+; MIR6：计时中断, 只做计时/显示/扫描
+;========================================
+MIR6        PROC NEAR
+            PUSH    AX
+            PUSH    BX
+            PUSH    DX
+            PUSH    DS
+            MOV     AX,DATA
+            MOV     DS,AX
+
+            CMP     STATUS,01H
+            JNZ     M6_EOI
+
+            MOV     BX,TIME
+            DEC     BX
+            MOV     TIME,BX
+            CMP     BX,0
+            JZ      TIMEOUT
+
+            ; 每秒更新 9->0
+            MOV     BX,MS_CNT
+            DEC     BX
+            MOV     MS_CNT,BX
+            JNZ     DO_SCAN
+
+            MOV     MS_CNT,MS_INIT
+            CMP     SEC_DIG,0
+            JZ      DO_SCAN
+            DEC     SEC_DIG
+            MOV     AL,SEC_DIG
+            CALL    SHOW_DIG
+
+DO_SCAN:
+            CALL    SWITCH_SCAN
+            JMP     M6_EOI
+
+TIMEOUT:
+            MOV     SEC_DIG,0
+            MOV     AL,0
+            CALL    SHOW_DIG
+
+            MOV     STATUS,10H
+            MOV     TIME,TIME_INIT
+            MOV     MS_CNT,MS_INIT
+
+            ; 超时LED示例：PC7亮，同时强制PC0保持选通
+            MOV     AL,80H
+            CALL    PC_FORCE_X3_ON
+
+M6_EOI:
+            MOV     AL,20H
+            OUT     20H,AL
+            POP     DS
+            POP     DX
+            POP     BX
+            POP     AX
+            IRET
+MIR6        ENDP
+
+;========================================
+; KK1 中断（IR0）
+;========================================
+SIR1        PROC NEAR
+            PUSH    AX
+            PUSH    DX
+            PUSH    DS
+            MOV     AX,DATA
+            MOV     DS,AX
+
+            CALL    ALTER
+
+            MOV     DX,0680H
+            MOV     AL,20H
+            OUT     DX,AL
+            OUT     20H,AL
+
+            POP     DS
+            POP     DX
+            POP     AX
+            IRET
+SIR1        ENDP
+
+ALTER       PROC NEAR
+            PUSH    AX
+            MOV     AL,STA
+            TEST    AL,01H
+            JNZ     EVEN1
+
+ODD1:
+            MOV     STA,01H
+            CALL    RESET
+            JMP     A_DONE
+
+EVEN1:
+            MOV     STA,00H
+            CALL    STAT
+
+A_DONE:
+            POP     AX
+            RET
+ALTER       ENDP
+
+RESET       PROC NEAR
+            PUSH    AX
+            PUSH    DX
+
+            MOV     STATUS,00H
+            MOV     TIME,TIME_INIT
+            MOV     MS_CNT,MS_INIT
+            MOV     SEC_DIG,9
+            MOV     WINNER,0FFH
+            MOV     SCORE_REQ,0
+            MOV     BEEP_REQ,0
+
+            ; LED全灭（PC0强制保持选通）
+            MOV     AL,00H
+            CALL    PC_FORCE_X3_ON
+
+            ; 数码管灭
+            MOV     DX,P8255B
+            MOV     AL,00H
+            OUT     DX,AL
+
+            POP     DX
+            POP     AX
+            RET
+RESET       ENDP
+
+STAT        PROC NEAR
+            PUSH    AX
+            PUSH    DX
+
+CHECK:
+            MOV     DX,P8255A
+            IN      AL,DX
+            CMP     AL,0
+            JNZ     EARLY
+
+            MOV     STATUS,01H
+            MOV     TIME,TIME_INIT
+            MOV     MS_CNT,MS_INIT
+            MOV     SEC_DIG,9
+            MOV     AL,9
+            CALL    SHOW_DIG
+
+            ; 状态LED示例：PC4/PC5亮（PC0强制选通）
+            MOV     AL,30H
+            CALL    PC_FORCE_X3_ON
+            JMP     S_DONE
+
+EARLY:
+            ; 提前按键：PC6/PC7亮（PC0强制选通）
+            MOV     AL,0C0H
+            CALL    PC_FORCE_X3_ON
+            JMP     CHECK
+
+S_DONE:
+            POP     DX
+            POP     AX
+            RET
+STAT        ENDP
+
+;========================================
+; KK2 中断（IR1）：只置位菜单请求
+;========================================
+SIR0        PROC NEAR
+            PUSH    AX
+            PUSH    DX
+            PUSH    DS
+            MOV     AX,DATA
+            MOV     DS,AX
+
+            MOV     MENU_REQ,1
+
+            MOV     DX,0680H
+            MOV     AL,20H
+            OUT     DX,AL
+            OUT     20H,AL
+
+            POP     DS
+            POP     DX
+            POP     AX
+            IRET
+SIR0        ENDP
+
+;========================================
+; 软延时（音效节拍）输入：DL=次数
+;========================================
+DALLY2      PROC NEAR
+            PUSH    AX
+            PUSH    CX
+D0:
+            MOV     CX,0010H
+D1:
+            MOV     AX,0FF0H
+D2:
+            DEC     AX
+            JNZ     D2
+            LOOP    D1
+            DEC     DL
+            JNZ     D0
+            POP     CX
+            POP     AX
+            RET
+DALLY2      ENDP
+
+;========================================
+; 音效播放, 用 FREQ_PTRS 表
+;=========================================
+BEEP_PROC   PROC NEAR
+            PUSH    AX
+            PUSH    BX
+            PUSH    CX
+            PUSH    DX
+            PUSH    SI
+            PUSH    DI
+
+            CMP     WINNER,0FFH
+            JZ      BP_EXIT
+
+            ; C0 -> Mode3 方波
+            MOV     DX,TIMERM
+            MOV     AL,36H                  ; C0, LSB/MSB, Mode3
+            OUT     DX,AL
+
+            ; 选频率表：SI = FREQ_PTRS[WINNER]
+            XOR     BX,BX
+            MOV     BL,WINNER               ; 0..7
+            CMP     BL,7
+            JBE     BP_OK
+            MOV     BL,7
+BP_OK:
+            SHL     BX,1
+            MOV     SI,WORD PTR FREQ_PTRS[BX]
+            MOV     DI,OFFSET TIME_LIST
+
+BP_PLAY:
+            CMP     WORD PTR [SI],0
+            JE      BP_MUTE
+
+            MOV     DX,000FH
+            MOV     AX,4240H
+            DIV     WORD PTR [SI]
+
+            MOV     DX,TIMER0
+            OUT     DX,AL                   ; LSB
+            MOV     AL,AH
+            OUT     DX,AL                   ; MSB
+
+            MOV     DL,[DI]
+            CALL    DALLY2
+
+            ADD     SI,2
+            INC     DI
+            JMP     BP_PLAY
+
+BP_MUTE:
+            ; 消音：C0 -> Mode0
+            MOV     DX,TIMERM
+            MOV     AL,30H                  ; C0, LSB/MSB, Mode0
+            OUT     DX,AL
+            MOV     DX,TIMER0
+            MOV     AL,01H
+            OUT     DX,AL
+            MOV     AL,00H
+            OUT     DX,AL
+
+BP_EXIT:
+            POP     DI
+            POP     SI
+            POP     DX
+            POP     CX
+            POP     BX
+            POP     AX
+            RET
+BEEP_PROC   ENDP
+
+;========================================
+; 主循环分发, 优先：音效 -> 打分 -> 菜单
+;========================================
+DISPATCH    PROC NEAR
+            PUSH    AX
+            MOV     AX,DATA
+            MOV     DS,AX
+
+            CMP     BEEP_REQ,0
+            JZ      CHK_SCORE
+            MOV     BEEP_REQ,0
+            CALL    BEEP_PROC
+
+CHK_SCORE:
+            CMP     SCORE_REQ,0
+            JZ      CHK_MENU
+            MOV     SCORE_REQ,0
+            CALL    SCORE_PROC
+
+CHK_MENU:
+            CMP     MENU_REQ,0
+            JZ      D_EXIT
+            MOV     MENU_REQ,0
+            MOV     STATUS,00H
+            CALL    MENU_PROC
+
+D_EXIT:
+            POP     AX
+            RET
+DISPATCH    ENDP
+
+;========================================
+; 打分（主循环）
+;========================================
+SCORE_PROC  PROC NEAR
+            PUSH    AX
+            PUSH    BX
+            PUSH    DX
+
+            CMP     WINNER,0FFH
+            JZ      SP_DONE
+
+ASK:
+            LEA     DX,INFO2
+            MOV     AH,09H
+            INT     21H
+
+            MOV     AH,01H
+            INT     21H
+            CMP     AL,'0'
+            JB      ASK
+            CMP     AL,'9'
+            JA      ASK
+            SUB     AL,'0'
+
+            XOR     BX,BX
+            MOV     BL,WINNER
+            ADD     SCORES[BX],AL
+
+            MOV     AH,02H
+            MOV     DL,0DH
+            INT     21H
+            MOV     DL,0AH
+            INT     21H
+
+SP_DONE:
+            POP     DX
+            POP     BX
+            POP     AX
+            RET
+SCORE_PROC  ENDP
+
+;========================================
+; 菜单（主循环）
+;========================================
+MENU_PROC   PROC NEAR
+            PUSH    AX
+            PUSH    BX
+            PUSH    CX
+            PUSH    DX
+            PUSH    SI
+
+SHOWMENU:
+            LEA     DX,INFO1
+            MOV     AH,09H
+            INT     21H
+            LEA     DX,INFO3
+            MOV     AH,09H
+            INT     21H
+            LEA     DX,RETMSG
+            MOV     AH,09H
+            INT     21H
+
+INPU:
+            MOV     BYTE PTR INBUF+1,0
+            LEA     DX,INBUF
+            MOV     AH,0AH
+            INT     21H
+            CMP     BYTE PTR INBUF+1,0
+            JZ      INPU
+
+            MOV     AL,BYTE PTR INBUF+2
+            CMP     AL,'0'
+            JZ      M_EXIT
+            CMP     AL,'1'
+            JZ      DISPLAY1
+            CMP     AL,'2'
+            JZ      AGAIN
+
+            LEA     DX,ERROR
+            MOV     AH,09H
+            INT     21H
+            JMP     SHOWMENU
+
+DISPLAY1:
+            MOV     SI,0
+            MOV     CX,9
+            MOV     DL,0DH
+            MOV     AH,02H
+            INT     21H
+            MOV     DL,0AH
+            INT     21H
+L1:
+            MOV     DL,SCORES[SI]
+            ADD     DL,30H
+            MOV     AH,02H
+            INT     21H
+            INC     SI
+            LOOP    L1
+
+            LEA     DX,ENTERMSG
+            MOV     AH,09H
+            INT     21H
+            CALL    WAIT_ENTER
+            JMP     SHOWMENU
+
+AGAIN:
+            MOV     SI,0
+            MOV     CX,9
+L2:
+            MOV     SCORES[SI],0
+            INC     SI
+            LOOP    L2
+
+            LEA     DX,CLRMSG
+            MOV     AH,09H
+            INT     21H
+
+            LEA     DX,ENTERMSG
+            MOV     AH,09H
+            INT     21H
+            CALL    WAIT_ENTER
+            JMP     SHOWMENU
+
+M_EXIT:
+            POP     SI
+            POP     DX
+            POP     CX
+            POP     BX
+            POP     AX
+            RET
+MENU_PROC   ENDP
+
+;========================================
+; 主入口：初始化 8255 / 中断向量 / 8259 / 8254
+;=========================================
+START:
+            MOV     AX,DATA
+            MOV     DS,AX
+
+            ; 8255：PA输入 PB/PC输出
+            MOV     DX,P8255M
+            MOV     AL,90H
+            OUT     DX,AL
+
+            ; 中断向量
+            PUSH    DS
+            MOV     AX,0000H
+            MOV     DS,AX
+
+            ; INT30 -> SIR0 (KK2)
+            MOV     AX,OFFSET SIR0
+            MOV     SI,00C0H
+            MOV     [SI],AX
+            MOV     AX,CS
+            MOV     SI,00C2H
+            MOV     [SI],AX
+
+            ; INT0E -> MIR6
+            MOV     AX,OFFSET MIR6
+            MOV     SI,0038H
+            MOV     [SI],AX
+            MOV     AX,CS
+            MOV     SI,003AH
+            MOV     [SI],AX
+
+            ; INT31 -> SIR1 (KK1)
+            MOV     AX,OFFSET SIR1
+            MOV     SI,00C4H
+            MOV     [SI],AX
+            MOV     AX,CS
+            MOV     SI,00C6H
+            MOV     [SI],AX
+
+            CLI
+            POP     DS
+
+            ; 主片8259
+            MOV     AL,11H
+            OUT     20H,AL
+            MOV     AL,08H
+            OUT     21H,AL
+            MOV     AL,80H
+            OUT     21H,AL
+            MOV     AL,01H
+            OUT     21H,AL
+
+            ; 从片8259 (0680/0682)
+            MOV     DX,0680H
+            MOV     AL,11H
+            OUT     DX,AL
+            MOV     DX,0682H
+            MOV     AL,30H
+            OUT     DX,AL
+            MOV     AL,07H
+            OUT     DX,AL
+            MOV     AL,01H
+            OUT     DX,AL
+
+            ; 屏蔽字：从片开IR0/IR1
+            MOV     AL,0FCH
+            OUT     DX,AL
+            MOV     AL,2BH
+            OUT     21H,AL
+            STI
+
+            ; 8254：C1 -> MIR6（节拍）
+            MOV     DX,TIMERM
+            MOV     AL,76H                  ; C1, LSB/MSB, Mode3
+            OUT     DX,AL
+            MOV     DX,TIMER1
+            MOV     AX,1000
+            OUT     DX,AL
+            MOV     AL,AH
+            OUT     DX,AL
+
+            ; C0：先配置 Mode0 消音（需要时 BEEP_PROC 再切回 Mode3）
+            MOV     DX,TIMERM
+            MOV     AL,30H
+            OUT     DX,AL
+            MOV     DX,TIMER0
+            MOV     AL,01H
+            OUT     DX,AL
+            MOV     AL,00H
+            OUT     DX,AL
+
+            ; 上电：PC0保持选通（X3），LED清
+            MOV     AL,00H
+            CALL    PC_FORCE_X3_ON
+
+MAIN_LOOP:
+            STI
+L_MAIN:
+            HLT
+            CALL    DISPATCH
+            JMP     L_MAIN
+
+CODE        ENDS
+            END     START
