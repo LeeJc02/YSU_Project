@@ -1,0 +1,11 @@
+   0: jmp 0 1
+   1: int 0 5
+   2: opr 0 read
+   3: sto 0 3
+   4: opr 0 read
+   5: sto 0 4
+   6: lod 0 3
+   7: lod 0 4
+   8: opr 0 add
+   9: opr 0 write
+  10: opr 0 ret

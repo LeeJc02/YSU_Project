@@ -1,0 +1,11 @@
+var a[3], i;
+begin
+
+  a[2] := 30;
+  i := 0;
+  while i < 3 do
+  begin
+    write(a[i]);
+    i := i + 1;
+  end;
+end.

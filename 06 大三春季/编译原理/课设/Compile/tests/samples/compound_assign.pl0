@@ -1,0 +1,11 @@
+var x, y;
+begin
+  x := 1;
+  x += 2;
+  x--;
+  y := 3;
+  y *= 2;
+  y /= 3;
+  write(x);
+  writeln(y)
+end.

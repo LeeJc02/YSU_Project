@@ -1,0 +1,254 @@
+PL/0 Sample Batch Report
+Generated: 2025-10-24 18:50:26
+
+=== array_bounds.pl0 ===
+-- Source --
+var a[3], i, sum;
+begin
+  a[0] := 1; a[1] := 2; a[2] := 3;
+  sum := 0;
+  i := 0;
+  while i < 3 do
+  begin
+    sum += a[i];
+    i++;
+  end;
+  write(sum)
+end.
+
+-- P-Code --
+   0: jmp 0 1
+   1: int 0 8
+   2: lda 0 3
+   3: lit 0 0
+   4: idx 0 0
+   5: lit 0 1
+   6: sti 0 0
+   7: lda 0 3
+   8: lit 0 1
+   9: idx 0 0
+  10: lit 0 2
+  11: sti 0 0
+  12: lda 0 3
+  13: lit 0 2
+  14: idx 0 0
+  15: lit 0 3
+  16: sti 0 0
+  17: lit 0 0
+  18: sto 0 7
+  19: lit 0 0
+  20: sto 0 6
+  21: lod 0 6
+  22: lit 0 3
+  23: opr 0 lt
+  24: jpc 0 37
+  25: lod 0 7
+  26: lda 0 3
+  27: lod 0 6
+  28: idx 0 0
+  29: ldi 0 0
+  30: opr 0 add
+  31: sto 0 7
+  32: lod 0 6
+  33: lit 0 1
+  34: opr 0 add
+  35: sto 0 6
+  36: jmp 0 21
+  37: lod 0 7
+  38: opr 0 write
+  39: opr 0 ret
+
+-- Output --
+6
+
+=== compound_assign.pl0 ===
+-- Source --
+var x, y;
+begin
+  x := 1;
+  x += 2;
+  x--;
+  y := 3;
+  y *= 2;
+  y /= 3;
+  write(x);
+  writeln(y)
+end.
+
+-- P-Code --
+   0: jmp 0 1
+   1: int 0 5
+   2: lit 0 1
+   3: sto 0 3
+   4: lod 0 3
+   5: lit 0 2
+   6: opr 0 add
+   7: sto 0 3
+   8: lod 0 3
+   9: lit 0 1
+  10: opr 0 sub
+  11: sto 0 3
+  12: lit 0 3
+  13: sto 0 4
+  14: lod 0 4
+  15: lit 0 2
+  16: opr 0 mul
+  17: sto 0 4
+  18: lod 0 4
+  19: lit 0 3
+  20: opr 0 div
+  21: sto 0 4
+  22: lod 0 3
+  23: opr 0 write
+  24: lod 0 4
+  25: opr 0 write
+  26: opr 0 writeln
+  27: opr 0 ret
+
+-- Output --
+22
+
+=== error_missing_semicolon.pl0 ===
+-- Source --
+var x
+begin
+  x := 1
+  write(x);
+end.
+
+-- Compile Diagnostics --
+error 6: expected ';' after var declarations (1:6-2:6)
+error 6: expected '.' at end of program (3:9-4:8)
+
+-- Result --
+expected failure
+
+=== if_else.pl0 ===
+-- Source --
+const alwaysTrue = true;
+var a;
+begin
+  a := 1;
+  if alwaysTrue and not (a = 0) then
+    write(1)
+  else
+    write(0)
+end.
+
+-- P-Code --
+   0: jmp 0 1
+   1: int 0 4
+   2: lit 0 1
+   3: sto 0 3
+   4: lit 0 1
+   5: lod 0 3
+   6: lit 0 0
+   7: opr 0 eq
+   8: opr 0 not
+   9: opr 0 and
+  10: jpc 0 14
+  11: lit 0 1
+  12: opr 0 write
+  13: jmp 0 16
+  14: lit 0 0
+  15: opr 0 write
+  16: opr 0 ret
+
+-- Output --
+1
+
+=== io_mix.pl0 ===
+-- Source --
+var x, y;
+begin
+  read(x, y);
+  write(x + y)
+end.
+
+-- P-Code --
+   0: jmp 0 1
+   1: int 0 5
+   2: opr 0 read
+   3: sto 0 3
+   4: opr 0 read
+   5: sto 0 4
+   6: lod 0 3
+   7: lod 0 4
+   8: opr 0 add
+   9: opr 0 write
+  10: opr 0 ret
+
+-- Output --
+4
+
+=== repeat_until.pl0 ===
+-- Source --
+var n;
+begin
+  n := 0;
+  repeat
+    n += 2;
+    write(n)
+  until n >= 4
+end.
+
+-- P-Code --
+   0: jmp 0 1
+   1: int 0 4
+   2: lit 0 0
+   3: sto 0 3
+   4: lod 0 3
+   5: lit 0 2
+   6: opr 0 add
+   7: sto 0 3
+   8: lod 0 3
+   9: opr 0 write
+  10: lod 0 3
+  11: lit 0 4
+  12: opr 0 ge
+  13: jpc 0 4
+  14: opr 0 ret
+
+-- Output --
+24
+
+=== while_arith.pl0 ===
+-- Source --
+var sum, i;
+begin
+  sum := 0;
+  i := 1;
+  while i <= 5 do
+  begin
+    sum += i;
+    i++;
+  end;
+  write(sum)
+end.
+
+-- P-Code --
+   0: jmp 0 1
+   1: int 0 5
+   2: lit 0 0
+   3: sto 0 3
+   4: lit 0 1
+   5: sto 0 4
+   6: lod 0 4
+   7: lit 0 5
+   8: opr 0 le
+   9: jpc 0 19
+  10: lod 0 3
+  11: lod 0 4
+  12: opr 0 add
+  13: sto 0 3
+  14: lod 0 4
+  15: lit 0 1
+  16: opr 0 add
+  17: sto 0 4
+  18: jmp 0 6
+  19: lod 0 3
+  20: opr 0 write
+  21: opr 0 ret
+
+-- Output --
+15

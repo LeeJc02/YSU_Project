@@ -1,0 +1,8 @@
+var x;
+begin
+  x := 0;
+  repeat
+    x := x + 1;
+    write(x)
+  until x = 3;
+end.

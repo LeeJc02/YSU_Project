@@ -1,8 +1,10 @@
 # Dependencies
 /node_modules
+target/
 
 # Production
 /build
+cmake-build-*/
 
 # Generated files
 .docusaurus
@@ -10,10 +12,24 @@
 
 # Misc
 .DS_Store
+.idea/
+.vscode/
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+*.autosave
+*.pro.user
+*.mp4
+*.o
+*.class
+*.pyc
+__pycache__/
+
+# Local application configuration and data
+**/src/main/resources/application.properties
+**/user_data.csv
 
 npm-debug.log*
 yarn-debug.log*

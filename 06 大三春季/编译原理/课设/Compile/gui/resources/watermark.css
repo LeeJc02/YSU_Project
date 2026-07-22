@@ -1,0 +1,1 @@
+body::after { content: '燕山大学 李济岑作品'; position: absolute; bottom: 16px; right: 24px; color: rgba(255,255,255,0.35); font: 28px "PingFang SC", "Microsoft YaHei", sans-serif; font-weight:600; pointer-events: none; }
