@@ -1,0 +1,11 @@
+var sum, i;
+begin
+  sum := 0;
+  i := 1;
+  while i <= 5 do
+  begin
+    sum += i;
+    i++;
+  end;
+  write(sum)
+end.

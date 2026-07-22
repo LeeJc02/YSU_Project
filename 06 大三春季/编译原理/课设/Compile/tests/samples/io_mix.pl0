@@ -1,0 +1,5 @@
+var x, y;
+begin
+  read(x, y);
+  write(x + y)
+end.

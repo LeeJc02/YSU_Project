@@ -1,0 +1,9 @@
+const alwaysTrue = true;
+var a;
+begin
+  a := 1;
+  if alwaysTrue and not (a = 0) then
+    write(1)
+  else
+    write(0)
+end.

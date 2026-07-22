@@ -1,0 +1,29 @@
+spring.application.name=BankATM
+
+server.port=8080
+server.servlet.context-path= /
+spring.datasource.url=${DB_URL:jdbc:mysql://localhost:3306/bank_atm}
+spring.datasource.username=${DB_USERNAME:root}
+spring.datasource.password=${DB_PASSWORD:change-me}
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.datasource.jpa.hibernate.ddl-auto=update
+spring.security.servlet.session.invalid-session-url= /
+server.servlet.session.timeout=30m
+
+spring.security.user.name=${APP_USERNAME:admin}
+spring.security.user.password=${APP_PASSWORD:change-me}
+
+# Thymeleaf ??
+spring.thymeleaf.prefix=classpath:/templates/
+spring.thymeleaf.suffix=.html
+spring.thymeleaf.mode=HTML
+spring.thymeleaf.encoding=UTF-8
+spring.thymeleaf.cache=false
+
+# MyBatis
+mybatis.mapper-locations=classpath:/mappers/*.xml
+mybatis.type-aliases-package=com.javaweb.bankatm.pojo
+mybatis.configuration.map-underscore-to-camel-case=true
+
+
